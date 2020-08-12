@@ -11,8 +11,8 @@ class UsuarioRoutes {
     config() {
         this.router.get('/', UsuarioController_1.findAll);
         this.router.post('/', [utils_1.verifyAccessToken, utils_1.verifyRole], UsuarioController_1.save);
-        this.router.put('/:id', UsuarioController_1.update);
-        this.router.delete('/:id', UsuarioController_1.deleteUser);
+        this.router.put('/:id', [utils_1.verifyAccessToken, utils_1.verifyRole], UsuarioController_1.update);
+        this.router.delete('/:id', [utils_1.verifyAccessToken, utils_1.verifyRole], UsuarioController_1.deleteUser);
     }
 }
 const usuarioRoutes = new UsuarioRoutes();
