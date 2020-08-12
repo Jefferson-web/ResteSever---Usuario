@@ -10,6 +10,7 @@ const compression_1 = __importDefault(require("compression"));
 const cors_1 = __importDefault(require("cors"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const UsuarioRoutes_1 = __importDefault(require("./routes/UsuarioRoutes"));
+const AuthRoutes_1 = __importDefault(require("./routes/AuthRoutes"));
 const config_1 = __importDefault(require("./config/config"));
 class Server {
     constructor() {
@@ -41,6 +42,7 @@ class Server {
     }
     routes() {
         this.__app.use('/usuarios', UsuarioRoutes_1.default);
+        this.__app.use('/auth', AuthRoutes_1.default);
     }
     __init() {
         this.__app.listen(config_1.default.PORT, () => {
