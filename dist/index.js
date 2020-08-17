@@ -27,7 +27,7 @@ class Server {
         this.__app.use(helmet_1.default());
         this.__app.use(compression_1.default());
         this.__app.use(cors_1.default({
-            origin: 'http://localhost:3000',
+            origin: true,
             allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true
         }));

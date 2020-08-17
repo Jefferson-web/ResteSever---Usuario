@@ -1,17 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const Usuario_1 = __importDefault(require("../models/Usuario"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const utils_1 = require("../helpers/utils");
-const config_1 = __importDefault(require("../config/config"));
-const google_auth_library_1 = require("google-auth-library");
-const client = new google_auth_library_1.OAuth2Client(config_1.default.CLIENT_ID);
-function sign(req, res) {
+import { Request, Response } from 'express';
+import Usuario from '../models/Usuario';
+import bcrypt from 'bcrypt';
+import { generateAccessToken } from '../helpers/utils';
+import config from '../config/config';
+import { OAuth2Client } from 'google-auth-library';
+const client = new OAuth2Client(config.CLIENT_ID);
+
+export function sign(req: Request, res: Response) {
     const { email, password } = req.body;
-    Usuario_1.default.findOne({ email }).exec((err, usuario) => {
+    Usuario.findOne({ email }).exec((err, usuario) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -26,7 +23,7 @@ function sign(req, res) {
                 }
             });
         }
-        if (!bcrypt_1.default.compareSync(password, usuario.password)) {
+        if (!bcrypt.compareSync(password, usuario.password)) {
             return res.status(400).json({
                 ok: false,
                 err: {
@@ -34,7 +31,7 @@ function sign(req, res) {
                 }
             });
         }
-        let token = utils_1.generateAccessToken(usuario);
+        let token = generateAccessToken(usuario);
         res.status(200).json({
             ok: true,
             usuario,
@@ -42,32 +39,35 @@ function sign(req, res) {
         });
     });
 }
-exports.sign = sign;
+
 // CONFIGURACIONES DE GOOGLE
-async function verify(token) {
-    var _a, _b, _c;
+
+async function verify(token: any) {
     const ticket = await client.verifyIdToken({
         idToken: token,
-        audience: config_1.default.CLIENT_ID,
+        audience: config.CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
     });
     const payload = ticket.getPayload();
     return {
-        nombre: (_a = payload) === null || _a === void 0 ? void 0 : _a.name,
-        email: (_b = payload) === null || _b === void 0 ? void 0 : _b.email,
-        img: (_c = payload) === null || _c === void 0 ? void 0 : _c.picture,
+        nombre: payload?.name,
+        email: payload?.email,
+        img: payload?.picture,
         google: true
-    };
+    }
 }
-async function GoogleSignIn(req, res) {
+
+export async function GoogleSignIn(req: Request, res: Response) {
     const token = req.body.idtoken;
-    let googleUser = await verify(token)
+    let googleUser: any = await verify(token)
         .catch(e => {
-        return res.status(403).json({
-            ok: false,
-            err: e
+            return res.status(403).json({
+                ok: false,
+                err: e
+            });
         });
-    });
-    Usuario_1.default.findOne({ email: googleUser.email }, (err, usuario) => {
+    Usuario.findOne({ email: googleUser.email }, (err, usuario: any) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -82,19 +82,17 @@ async function GoogleSignIn(req, res) {
                         message: 'Debe realizar la autenticación normal'
                     }
                 });
-            }
-            else {
-                let token = utils_1.generateAccessToken(usuario);
+            } else {
+                let token = generateAccessToken(usuario);
                 return res.status(200).json({
                     ok: true,
                     usuario,
                     token
                 });
             }
-        }
-        else {
+        } else {
             // Si el usuario no existe en la base de datos
-            let usuario = new Usuario_1.default();
+            let usuario = new Usuario();
             usuario.nombre = googleUser.nombre;
             usuario.email = googleUser.email;
             usuario.img = googleUser.img;
@@ -107,7 +105,7 @@ async function GoogleSignIn(req, res) {
                         err
                     });
                 }
-                let token = utils_1.generateAccessToken(usuario);
+                let token = generateAccessToken(usuario);
                 res.status(200).json({
                     ok: true,
                     usuario: usuarioDB,
@@ -117,4 +115,3 @@ async function GoogleSignIn(req, res) {
         }
     });
 }
-exports.GoogleSignIn = GoogleSignIn;

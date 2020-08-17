@@ -1,13 +1,10 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const Usuario_1 = __importDefault(require("../models/Usuario"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
-async function findAll(req, res) {
+import { Request, Response } from 'express';
+import Usuario from '../models/Usuario';
+import bcrypt from 'bcrypt';
+
+export async function findAll(req: Request, res: Response) {
     let desde = Number(req.query.desde) || 1;
-    await Usuario_1.default.find({}, 'nombre email rol estado').skip((desde - 1) * 5).limit(5).exec((err, usuariosDB) => {
+    await Usuario.find({}, 'nombre email rol estado').skip((desde - 1) * 5).limit(5).exec((err, usuariosDB) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -21,7 +18,7 @@ async function findAll(req, res) {
                 error: 'No se pudo obtener a los usuarios.'
             });
         }
-        Usuario_1.default.count({}).exec((err, conteo) => {
+        Usuario.count({}).exec((err, conteo) => {
             res.status(200).json({
                 ok: true,
                 usuarios: usuariosDB,
@@ -30,13 +27,13 @@ async function findAll(req, res) {
         });
     });
 }
-exports.findAll = findAll;
-async function save(req, res) {
+
+export async function save(req: any, res: Response) {
     let payload = req.body;
-    const usuario = new Usuario_1.default({
+    const usuario = new Usuario({
         nombre: payload.nombre,
         email: payload.email,
-        password: bcrypt_1.default.hashSync(payload.password, 10),
+        password: bcrypt.hashSync(payload.password, 10),
         rol: payload.rol
     });
     await usuario.save((err, usuarioDB) => {
@@ -60,11 +57,11 @@ async function save(req, res) {
         });
     });
 }
-exports.save = save;
-async function update(req, res) {
+
+export async function update(req: Request, res: Response) {
     let _id = req.params.id;
     let payload = req.body;
-    await Usuario_1.default.findByIdAndUpdate(_id, payload, { new: true }, (err, usuario) => {
+    await Usuario.findByIdAndUpdate(_id, payload, { new: true }, (err, usuario) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -79,10 +76,10 @@ async function update(req, res) {
         });
     });
 }
-exports.update = update;
-async function deleteUser(req, res) {
+
+export async function deleteUser(req: Request, res: Response) {
     let _id = req.params.id;
-    await Usuario_1.default.findByIdAndDelete({ _id }, (err, usuarioEliminado) => {
+    await Usuario.findByIdAndDelete({ _id }, (err, usuarioEliminado) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -104,4 +101,3 @@ async function deleteUser(req, res) {
         });
     });
 }
-exports.deleteUser = deleteUser;

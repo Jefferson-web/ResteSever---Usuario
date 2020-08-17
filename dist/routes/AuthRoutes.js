@@ -9,6 +9,7 @@ class AuthRoutes {
     }
     config() {
         this.router.post('/sign', AuthController_1.sign);
+        this.router.post('/google', AuthController_1.GoogleSignIn);
     }
 }
 const authRoutes = new AuthRoutes();
