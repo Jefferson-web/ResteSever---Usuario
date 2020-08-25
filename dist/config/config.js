@@ -14,7 +14,6 @@ else {
 process.env.CADUCIDAD_TOKEN = '24h';
 // ===================================
 // SEED de autenticación
-// SEED en producción : rI2dWXbGP7jDeJEGTv6Z2jOvh4S+YZoCLo7JT+2ZHiQ
 // ===================================
 process.env.TOKEN_SECRET = process.env.TOKEN_SECRET || 'este-es-el-seed-desarrollo';
 // ===================================
